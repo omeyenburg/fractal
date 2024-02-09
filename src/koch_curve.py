@@ -50,12 +50,13 @@ def draw():
     for vec in koch_curve.array:
         fractal_draw.append((vec.x, vec.y))
 
-    pygame.draw.lines(koch_curve.window, (255, 255, 255), True, fractal_draw)
+    #pygame.draw.lines(koch_curve.window, (255, 255, 255), True, fractal_draw)
+    koch_curve.draw_lines(fractal_draw, True)
 
 
 if __name__ == "__main__":
     koch_curve = Fractal()
-    koch_curve.iterations = 10
+    koch_curve.iterations = 6
     koch_curve.delay = 0.5
     koch_curve.func_init = init
     koch_curve.func_iter = iterate
