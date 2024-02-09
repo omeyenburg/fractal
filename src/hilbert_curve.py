@@ -1,12 +1,13 @@
 from fractal import Vec, Fractal
 from math import *
-import pygame
 
 
 def init():
-    hilbert_curve.array.append(Vec(0, 1))
-    hilbert_curve.array.append(Vec(1, 0))
-    hilbert_curve.array.append(Vec(0, -1))
+    hilbert_curve.array = [
+        Vec(0, 1),
+        Vec(1, 0),
+        Vec(0, -1)
+    ]
 
 
 def iterate():
@@ -16,18 +17,15 @@ def iterate():
     def rotate_left(point):
         return Vec(-point.y, -point.x)
 
-    updated_array = []
-    old_array = hilbert_curve.array[:]
-
-    updated_array.extend(map(rotate_right, old_array))
-    updated_array.append(Vec(0, 1))
-    updated_array.extend(old_array)
-    updated_array.append(Vec(1, 0))
-    updated_array.extend(old_array)
-    updated_array.append(Vec(0, -1))
-    updated_array.extend(map(rotate_left, old_array))
-
-    hilbert_curve.array = updated_array
+    hilbert_curve.array = [
+        *map(rotate_right, hilbert_curve.array),
+        Vec(0, 1),
+        *hilbert_curve.array,
+        Vec(1, 0),
+        *hilbert_curve.array,
+        Vec(0, -1),
+        *map(rotate_left, hilbert_curve.array)
+    ]
 
 
 def draw():
@@ -46,17 +44,12 @@ def draw():
         ))
 
     hilbert_curve.draw_lines(fractal_draw, False)
-    #pygame.draw.lines(
-    #    hilbert_curve.window,
-    #    (255, 255, 255),
-    #    False,
-    #    fractal_draw
-    #)
 
 
 if __name__ == "__main__":
-    hilbert_curve = Fractal()
-    hilbert_curve.iterations = 7
+    hilbert_curve = Fractal("Hilbert Curve")
+    hilbert_curve.coloured = True
+    hilbert_curve.iterations = 6
     hilbert_curve.delay = 0.5
     hilbert_curve.func_init = init
     hilbert_curve.func_iter = iterate

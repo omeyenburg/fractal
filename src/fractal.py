@@ -66,7 +66,7 @@ def gradient(f):
 
 
 class Fractal:
-    def __init__(self):
+    def __init__(self, name):
         pygame.init()
         info = pygame.display.Info()
 
@@ -74,8 +74,10 @@ class Fractal:
         self.height = int(info.current_h / 5 * 3)
         self.window = pygame.display.set_mode((self.width, self.height))
         self.clock = pygame.time.Clock()
+        pygame.display.set_caption(name)
 
         self.array = []
+        self.coloured = False
         self.iterations = 0
         self.delay = 0
         self.func_init = None
@@ -91,6 +93,10 @@ class Fractal:
                 self.func_iter()
 
     def draw_lines(self, points, connected):
+        if not self.coloured:
+            pygame.draw.lines(self.window, (255, 255, 255), connected, points)
+            return
+
         if connected:
             points.append(points[0])
 
@@ -108,9 +114,12 @@ class Fractal:
             raise RuntimeError("Fractal.func_draw was not set.")
 
         # Init
-        self.func_init()
-        thread = Thread(target=self.iterate, daemon=True)
-        thread.start()
+        if self.func_init:
+            self.func_init()
+
+        if self.func_iter:
+            thread = Thread(target=self.iterate, daemon=True)
+            thread.start()
 
         # Render
         while True:

@@ -33,7 +33,7 @@ def draw():
 
 
 if __name__ == "__main__":
-    carpet = Fractal()
+    carpet = Fractal("Sierpiński Carpet")
     carpet.iterations = 5
     carpet.delay = 0.5
     carpet.func_init = init

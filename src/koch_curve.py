@@ -1,13 +1,10 @@
 from fractal import Vec, Fractal
 from math import *
-import pygame
 
 
 def init():
-    width, height = pygame.display.get_surface().get_size()
-    center = Vec(width / 2, height / 2)
-
-    length = height / 3
+    center = Vec(koch_curve.width / 2, koch_curve.height / 2)
+    length = koch_curve.height / 3
 
     for i in range(3):
         angle = pi / 1.5 * i + pi / 6
@@ -44,18 +41,16 @@ def iterate():
 
 
 def draw():
-    width, height = koch_curve.width, koch_curve.height
-
     fractal_draw = []
     for vec in koch_curve.array:
         fractal_draw.append((vec.x, vec.y))
 
-    #pygame.draw.lines(koch_curve.window, (255, 255, 255), True, fractal_draw)
     koch_curve.draw_lines(fractal_draw, True)
 
 
 if __name__ == "__main__":
-    koch_curve = Fractal()
+    koch_curve = Fractal("Koch Curve")
+    koch_curve.coloured = True
     koch_curve.iterations = 6
     koch_curve.delay = 0.5
     koch_curve.func_init = init
