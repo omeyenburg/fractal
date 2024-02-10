@@ -16,7 +16,7 @@ def iterate(pixel):
             for i in range(mandelbrot_set.iterations):
                 z = z ** 2 + complex(x, y)
                 distance = sqrt(z.real ** 2 + z.imag ** 2)
-                if distance > 1_000_000_000:
+                if distance > 1_000_000:
                     floats.append(i / mandelbrot_set.iterations *
                                   (1 - log(distance) * 0.01))
                     break
