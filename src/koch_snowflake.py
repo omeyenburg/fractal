@@ -49,10 +49,12 @@ def draw():
 
 
 if __name__ == "__main__":
-    koch_curve = Fractal("Koch Curve")
-    koch_curve.coloured = True
-    koch_curve.iterations = 6
-    koch_curve.delay = 0.5
+    koch_curve = Fractal(
+        "Koch Snowflake",
+        iterations=6,
+        delay=0.5,
+        colour=True
+    )
     koch_curve.func_init = init
     koch_curve.func_iter = iterate
     koch_curve.func_draw = draw

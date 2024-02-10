@@ -47,10 +47,12 @@ def draw():
 
 
 if __name__ == "__main__":
-    hilbert_curve = Fractal("Hilbert Curve")
-    hilbert_curve.coloured = True
-    hilbert_curve.iterations = 6
-    hilbert_curve.delay = 0.5
+    hilbert_curve = Fractal(
+        "Hilbert Curve",
+        iterations=6,
+        delay=0.5,
+        colour=True
+    )
     hilbert_curve.func_init = init
     hilbert_curve.func_iter = iterate
     hilbert_curve.func_draw = draw

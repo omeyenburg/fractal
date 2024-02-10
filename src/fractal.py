@@ -1,6 +1,7 @@
 from threading import Thread
 import pygame
 import time
+import math
 
 
 class Vec:
@@ -47,7 +48,7 @@ class Color:
         return (i for i in (self.r, self.g, self.b))
 
     def __add__(self, other):
-        return Color(self.r + other.r, self.g + other.g, self.b + other.b)
+        return Color(min(self.r + other.r, 255), min(self.g + other.g, 255), min(self.b + other.b, 255))
 
     def __mul__(self, scalar):
         return Color(self.r * scalar, self.g * scalar, self.b * scalar)
@@ -56,17 +57,17 @@ class Color:
 def gradient(f):
     if f < 1/3:
         f = f * 3
-        return Color(255, 0, 0) * f + Color(0, 255, 0) * (1 - f)
+        return tuple(Color(255, 0, 0) * f + Color(0, 255, 0) * (1 - f))
     elif f < 2/3:
         f = (f - 1/3) * 3
-        return Color(0, 0, 255) * f + Color(255, 0, 0) * (1 - f)
+        return tuple(Color(0, 0, 255) * f + Color(255, 0, 0) * (1 - f))
     else:
         f = (f - 2/3) * 3
-        return Color(0, 255, 0) * f + Color(0, 0, 255) * (1 - f)
+        return tuple(Color(0, 255, 0) * f + Color(0, 0, 255) * (1 - f))
 
 
 class Fractal:
-    def __init__(self, name):
+    def __init__(self, name="", iterations=0, delay=0, colour=False, pixel=False, threads=1):
         pygame.init()
         info = pygame.display.Info()
 
@@ -77,9 +78,11 @@ class Fractal:
         pygame.display.set_caption(name)
 
         self.array = []
-        self.coloured = False
-        self.iterations = 0
-        self.delay = 0
+        self.iterations = iterations
+        self.delay = delay
+        self.colour = colour
+        self.pixel = pixel
+        self.threads=threads
         self.func_init = None
         self.func_iter = None
         self.func_draw = None
@@ -92,8 +95,13 @@ class Fractal:
             else:
                 self.func_iter()
 
+    def iterate_pixel(self, region):
+        for x in range(region[0], region[0] + region[2]):
+            for y in range(region[1], region[1] + region[3]):
+                self.func_iter((x, y))
+
     def draw_lines(self, points, connected):
-        if not self.coloured:
+        if not self.colour:
             pygame.draw.lines(self.window, (255, 255, 255), connected, points)
             return
 
@@ -102,7 +110,7 @@ class Fractal:
 
         for i in range(len(points) - 1):
             f = i / len(points)
-            pygame.draw.line(self.window, tuple(gradient(f)),
+            pygame.draw.line(self.window, gradient(f),
                              points[i], points[i + 1])
 
     def run(self):
@@ -118,8 +126,24 @@ class Fractal:
             self.func_init()
 
         if self.func_iter:
-            thread = Thread(target=self.iterate, daemon=True)
-            thread.start()
+            threads = []
+            if self.pixel:
+                regions_horizontal = math.ceil(self.threads / 4)
+                regions_vertical = self.threads // regions_horizontal
+                region_size = (self.width // regions_horizontal, self.height // regions_vertical)
+                for i in range(self.threads):
+                    region = (
+                        i % regions_horizontal * region_size[0],
+                        i // regions_horizontal * region_size[1],
+                        region_size[0],
+                        region_size[1]
+                    )
+                    thread = Thread(target=self.iterate_pixel, daemon=True, args=(region,))
+                    thread.start()
+                    threads.append(thread)
+            else:
+                thread = Thread(target=self.iterate, daemon=True)
+                thread.start()
 
         # Render
         while True:
@@ -128,8 +152,9 @@ class Fractal:
                     pygame.quit()
                     raise SystemExit(0)
 
-            self.window.fill((0, 0, 0))
-            self.func_draw()
+            if not self.pixel:
+                self.window.fill((0, 0, 0))
+                self.func_draw()
 
             pygame.display.flip()
             self.clock.tick(60)
