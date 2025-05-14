@@ -3,11 +3,7 @@ from math import *
 
 
 def init():
-    hilbert_curve.array = [
-        Vec(0, 1),
-        Vec(1, 0),
-        Vec(0, -1)
-    ]
+    hilbert_curve.array = [Vec(0, 1), Vec(1, 0), Vec(0, -1)]
 
 
 def iterate():
@@ -24,7 +20,7 @@ def iterate():
         Vec(1, 0),
         *hilbert_curve.array,
         Vec(0, -1),
-        *map(rotate_left, hilbert_curve.array)
+        *map(rotate_left, hilbert_curve.array),
     ]
 
 
@@ -36,23 +32,18 @@ def draw():
     point = Vec(0, 0)
     for vec in [Vec(0, 0)] + hilbert_curve.array:
         point += vec
-        fractal_draw.append((
-            (point.x - fractal_size + 0.5) *
-            height / 4 / fractal_size + width / 2,
-            (fractal_size - point.y - 0.5) *
-            height / 4 / fractal_size + height / 2
-        ))
+        fractal_draw.append(
+            (
+                (point.x - fractal_size + 0.5) * height / 4 / fractal_size + width / 2,
+                (fractal_size - point.y - 0.5) * height / 4 / fractal_size + height / 2,
+            )
+        )
 
     hilbert_curve.draw_lines(fractal_draw, False)
 
 
 if __name__ == "__main__":
-    hilbert_curve = Fractal(
-        "Hilbert Curve",
-        iterations=6,
-        delay=0.5,
-        colour=True
-    )
+    hilbert_curve = Fractal("Hilbert Curve", iterations=6, delay=0.5, colour=True)
     hilbert_curve.func_init = init
     hilbert_curve.func_iter = iterate
     hilbert_curve.func_draw = draw

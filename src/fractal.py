@@ -48,26 +48,32 @@ class Color:
         return (i for i in (self.r, self.g, self.b))
 
     def __add__(self, other):
-        return Color(min(self.r + other.r, 255), min(self.g + other.g, 255), min(self.b + other.b, 255))
+        return Color(
+            min(self.r + other.r, 255),
+            min(self.g + other.g, 255),
+            min(self.b + other.b, 255),
+        )
 
     def __mul__(self, scalar):
         return Color(self.r * scalar, self.g * scalar, self.b * scalar)
 
 
 def gradient(f):
-    if f < 1/3:
+    if f < 1 / 3:
         f = f * 3
         return tuple(Color(255, 0, 0) * f + Color(0, 255, 0) * (1 - f))
-    elif f < 2/3:
-        f = (f - 1/3) * 3
+    elif f < 2 / 3:
+        f = (f - 1 / 3) * 3
         return tuple(Color(0, 0, 255) * f + Color(255, 0, 0) * (1 - f))
     else:
-        f = (f - 2/3) * 3
+        f = (f - 2 / 3) * 3
         return tuple(Color(0, 255, 0) * f + Color(0, 0, 255) * (1 - f))
 
 
 class Fractal:
-    def __init__(self, name="", iterations=0, delay=0, colour=False, pixel=False, threads=1):
+    def __init__(
+        self, name="", iterations=0, delay=0, colour=False, pixel=False, threads=1
+    ):
         pygame.init()
         info = pygame.display.Info()
 
@@ -82,7 +88,7 @@ class Fractal:
         self.delay = delay
         self.colour = colour
         self.pixel = pixel
-        self.threads=threads
+        self.threads = threads
         self.func_init = None
         self.func_iter = None
         self.func_draw = None
@@ -110,8 +116,7 @@ class Fractal:
 
         for i in range(len(points) - 1):
             f = i / len(points)
-            pygame.draw.line(self.window, gradient(f),
-                             points[i], points[i + 1])
+            pygame.draw.line(self.window, gradient(f), points[i], points[i + 1])
 
     def run(self):
         if self.func_init is None:
@@ -130,15 +135,20 @@ class Fractal:
             if self.pixel:
                 regions_horizontal = math.ceil(self.threads / 4)
                 regions_vertical = self.threads // regions_horizontal
-                region_size = (self.width // regions_horizontal, self.height // regions_vertical)
+                region_size = (
+                    self.width // regions_horizontal,
+                    self.height // regions_vertical,
+                )
                 for i in range(self.threads):
                     region = (
                         i % regions_horizontal * region_size[0],
                         i // regions_horizontal * region_size[1],
                         region_size[0],
-                        region_size[1]
+                        region_size[1],
                     )
-                    thread = Thread(target=self.iterate_pixel, daemon=True, args=(region,))
+                    thread = Thread(
+                        target=self.iterate_pixel, daemon=True, args=(region,)
+                    )
                     thread.start()
                     threads.append(thread)
             else:

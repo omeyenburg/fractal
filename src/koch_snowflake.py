@@ -25,16 +25,10 @@ def iterate():
         angle = atan2(-start.y + end.y, -start.x + end.x)
         adjusted_angle = angle - pi / 3
 
-        center0 = start + Vec(
-            cos(angle),
-            sin(angle)
-        ) * edge_length
-        center0 = (start * (2 / 3) + end * (1 / 3))
-        center1 = center0 + Vec(
-            cos(adjusted_angle),
-            sin(adjusted_angle)
-        ) * edge_length
-        center2 = (start * (1 / 3) + end * (2 / 3))
+        center0 = start + Vec(cos(angle), sin(angle)) * edge_length
+        center0 = start * (2 / 3) + end * (1 / 3)
+        center1 = center0 + Vec(cos(adjusted_angle), sin(adjusted_angle)) * edge_length
+        center2 = start * (1 / 3) + end * (2 / 3)
         updated_array.extend([start, center0, center1, center2, end])
 
     koch_curve.array = updated_array
@@ -49,12 +43,7 @@ def draw():
 
 
 if __name__ == "__main__":
-    koch_curve = Fractal(
-        "Koch Snowflake",
-        iterations=6,
-        delay=0.5,
-        colour=True
-    )
+    koch_curve = Fractal("Koch Snowflake", iterations=6, delay=0.5, colour=True)
     koch_curve.func_init = init
     koch_curve.func_iter = iterate
     koch_curve.func_draw = draw

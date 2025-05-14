@@ -19,8 +19,11 @@ def iterate():
             for y_offset in (-1, 0, 1):
                 if not (x_offset or y_offset):
                     continue
-                square = Square(child.x + (x_offset) * child.a,
-                                child.y + (y_offset) * child.a, child.a / 3)
+                square = Square(
+                    child.x + (x_offset) * child.a,
+                    child.y + (y_offset) * child.a,
+                    child.a / 3,
+                )
                 children.add(square)
         parents.add(child)
 
@@ -33,11 +36,7 @@ def draw():
 
 
 if __name__ == "__main__":
-    carpet = Fractal(
-        "Sierpiński Carpet",
-        iterations=5,
-        delay=0.5
-    )
+    carpet = Fractal("Sierpiński Carpet", iterations=5, delay=0.5)
     carpet.func_init = init
     carpet.func_iter = iterate
     carpet.func_draw = draw
