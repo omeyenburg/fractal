@@ -1,3 +1,5 @@
-# fractal
+# Fractal
 
-Generation of a variation of fractals
+Generation of a variation of fractals.
+
+

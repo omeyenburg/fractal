@@ -1,5 +1,7 @@
+from queue import Queue
 from threading import Thread
 import pygame
+import numpy
 import time
 import math
 
@@ -38,24 +40,19 @@ class Square:
         return f"Square({round(self.x, 3)}, {round(self.y, 3)}, {round(self.a, 3)})"
 
 
-class Color:
-    def __init__(self, r, g, b):
-        self.r = r
-        self.g = g
-        self.b = b
-
-    def __iter__(self):
-        return (i for i in (self.r, self.g, self.b))
+class Color(tuple):
+    def __new__(cls, r, g, b):
+        return super().__new__(cls, (int(r), int(g), int(b)))
 
     def __add__(self, other):
         return Color(
-            min(self.r + other.r, 255),
-            min(self.g + other.g, 255),
-            min(self.b + other.b, 255),
+            min(self[0] + other[0], 255),
+            min(self[1] + other[1], 255),
+            min(self[2] + other[2], 255),
         )
 
     def __mul__(self, scalar):
-        return Color(self.r * scalar, self.g * scalar, self.b * scalar)
+        return Color(self[0] * scalar, self[1] * scalar, self[2] * scalar)
 
 
 def gradient(f):
@@ -83,6 +80,8 @@ class Fractal:
         self.clock = pygame.time.Clock()
         pygame.display.set_caption(name)
 
+        self.pixel_buffer = numpy.zeros((self.width, self.height, 3), dtype=numpy.uint8)
+
         self.array = []
         self.iterations = iterations
         self.delay = delay
@@ -90,6 +89,7 @@ class Fractal:
         self.pixel = pixel
         self.threads = threads
         self.func_init = None
+        self.func_init_draw = None
         self.func_iter = None
         self.func_draw = None
 
@@ -104,7 +104,7 @@ class Fractal:
     def iterate_pixel(self, region):
         for x in range(region[0], region[0] + region[2]):
             for y in range(region[1], region[1] + region[3]):
-                self.func_iter((x, y))
+                self.pixel_buffer[x, y] = self.func_iter((x, y))
 
     def draw_lines(self, points, connected):
         if not self.colour:
@@ -119,16 +119,11 @@ class Fractal:
             pygame.draw.line(self.window, gradient(f), points[i], points[i + 1])
 
     def run(self):
-        if self.func_init is None:
-            raise RuntimeError("Fractal.func_init was not set.")
-        if self.func_iter is None:
-            raise RuntimeError("Fractal.func_iter was not set.")
-        if self.func_draw is None:
-            raise RuntimeError("Fractal.func_draw was not set.")
-
-        # Init
         if self.func_init:
             self.func_init()
+
+        if self.func_init_draw:
+            self.func_init(self.pixel_buffer)
 
         if self.func_iter:
             threads = []
@@ -155,16 +150,17 @@ class Fractal:
                 thread = Thread(target=self.iterate, daemon=True)
                 thread.start()
 
-        # Render
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    raise SystemExit(0)
+                    raise SystemExit
 
-            if not self.pixel:
+            if self.pixel or not self.func_draw:
+                pygame.surfarray.blit_array(self.window, self.pixel_buffer)
+            else:
                 self.window.fill((0, 0, 0))
                 self.func_draw()
 
             pygame.display.flip()
-            self.clock.tick(60)
+            self.clock.tick(30)

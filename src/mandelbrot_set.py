@@ -1,5 +1,6 @@
 from fractal import Fractal, Color
 from math import *
+import numpy as np
 
 
 def iterate(pixel):
@@ -42,17 +43,53 @@ def iterate(pixel):
     g = 20 + 230 * (f - 0.1) ** 5
     b = 80 + 200 * f**5
 
-    mandelbrot_set.window.set_at(
-        pixel,
-        tuple(
-            Color(r, g, b) * (len(floats) / 9) + Color(0, 0, 0) * (1 - len(floats) / 9)
-        ),
-    )
+    return Color(r, g, b) * (len(floats) / 9) + Color(0, 0, 0) * (1 - len(floats) / 9)
+
+
+def draw(pixels):
+    height, width = pixels.shape[:2]
+
+    iterations = mandelbrot_set.iterations
+    threshold = 1e6
+
+    x_min, x_max = -2.5, 1.0
+    y_min, y_max = -3.0, 2.0
+
+    center_x = (x_min + x_max) / 2
+    center_y = (y_min + y_max) / 2
+
+    x = np.linspace(x_min, x_max, width, dtype=np.float32)
+    y = np.linspace(y_max, y_min, height, dtype=np.float32)  # note max → min
+
+    X, Y = np.meshgrid(x, y)
+    C = 1j * (X - center_x) - (Y - center_y)
+
+    Z = np.zeros_like(C, dtype=np.complex64)
+    strength = np.zeros_like(C, dtype=np.float32)
+    mask = np.ones_like(C, dtype=bool)
+
+    for i in range(iterations):
+        Z[mask] = Z[mask] ** 2 + C[mask]
+
+        distance = np.abs(Z)
+        escaped = mask & (distance > threshold)
+        mask[escaped] = False
+
+        strength[escaped] = i / iterations * (1 - np.log(distance[escaped]) * 0.01)
+
+    mask_escape = strength > 0
+    pixels[:, :, 0][mask_escape] = strength[mask_escape] * 255
+    pixels[:, :, 1][mask_escape] = ((strength[mask_escape] - 0.1) ** 5) * 230 + 20
+    pixels[:, :, 2][mask_escape] = (strength[mask_escape] ** 5) * 200 + 80
 
 
 if __name__ == "__main__":
-    mandelbrot_set = Fractal("Mandelbrot Set", iterations=50, pixel=True, threads=16)
-    mandelbrot_set.func_init = False
-    mandelbrot_set.func_iter = iterate
-    mandelbrot_set.func_draw = False
+    # Draw in one go
+    mandelbrot_set = Fractal("Mandelbrot Set", iterations=50)
+    mandelbrot_set.func_init_draw = draw
+
+    # Draw incrementally across multiple threads
+    # mandelbrot_set = Fractal("Mandelbrot Set", iterations=50, pixel=True, threads=8)
+    # mandelbrot_set.func_iter = iterate
+
     mandelbrot_set.run()

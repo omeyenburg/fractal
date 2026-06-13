@@ -6,7 +6,6 @@ import pygame
 def draw():
     length = tree.height / 5
     nodes = [(tree.width / 2, tree.height - length, -pi / 2)]
-    # angle = (pi / 5) / (max(1, pygame.mouse.get_pos()[1]))
     angle = pi / 6
     pygame.draw.line(
         tree.window, (255, 255, 255), nodes[0][:2], (nodes[0][0], nodes[0][1] + length)
@@ -37,10 +36,6 @@ def draw():
 
 
 if __name__ == "__main__":
-    tree = Fractal("Fractal Tree")
-    tree.iterations = 11
-    tree.delay = 0.5
-    tree.func_init = False
-    tree.func_iter = False
+    tree = Fractal("Fractal Tree", iterations=11, delay=0.5)
     tree.func_draw = draw
     tree.run()
